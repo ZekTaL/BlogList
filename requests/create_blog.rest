@@ -1,9 +1,11 @@
 POST http://localhost:3003/api/blogs
 Content-Type: application/json
+Authorization: bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6Inpla3QiLCJpZCI6IjVmNzgzMTQ3MDZkYWZjNGM1YzYwMjIwYiIsImlhdCI6MTYwMTcxMjUwMH0.aYOrG_Sm7aOnXp4cwF8Swq0XYIv3f4NqSpjeBlvdDqA
 
 {
-    "title": "Test Blog",
+    "title": "Blog with auth",
     "author": "F.G.",
     "url": "localhost",
-    "likes": 0
+    "likes": 0,
+    "userId": "5f78314706dafc4c5c60220b"
 }
