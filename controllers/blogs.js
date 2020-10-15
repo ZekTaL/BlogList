@@ -53,15 +53,26 @@ blogsRouter.delete('/:id', async (request, response) => {
   const user = await User.findById(decodedToken.id)
   const blog = await Blog.findById(request.params.id)
 
-  if (blog.user.toString() === user.id.toString())
+  // i can delete blogs if the user creator is not specified (old versions)
+  if (blog.user)
   {
-    await Blog.findByIdAndRemove(request.params.id)
-    response.status(204).end()
+    if (blog.user.toString() === user.id.toString())
+    {
+      await Blog.findByIdAndRemove(request.params.id)
+      response.status(204).end()
+    }
+    else
+    {
+      return response.status(401).json({ error: 'blogs can be deleted only by their creators'})
+    }
   }
   else
   {
-    return response.status(401).json({ error: 'blogs can be deleted only by their creators'})
+    // i delete the blog anyway
+    await Blog.findByIdAndRemove(request.params.id)
+    response.status(204).end()
   }
+  
 })
 
 // UPDATE A BLOG BY ID
