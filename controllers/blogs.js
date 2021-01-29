@@ -2,6 +2,7 @@ const blogsRouter = require('express').Router()
 const Blog = require('../models/blog')
 const User = require('../models/user')
 const jwt = require('jsonwebtoken')
+const { db } = require('../models/blog')
 
 // GET ALL BLOGS
 blogsRouter.get('/', async (request, response) => {
@@ -34,12 +35,24 @@ blogsRouter.post('/', async (request, response) => {
     author: body.author,
     url: body.url,
     likes: body.likes || 0,
-    user: user._id
+    user: user, // user: user._id,
+    comments: []
   })
 
   const savedBlog = await blog.save()
   user.blogs = user.blogs.concat(savedBlog._id)
   await user.save()
+  response.json(savedBlog)
+})
+
+// POST A BLOG COMMENT
+blogsRouter.post('/:id/comments', async (request, response) => {
+  const body = request.body
+  
+  const blog = await Blog.findById(request.params.id)
+  blog.comments = blog.comments.concat(body.comment)
+
+  const savedBlog = await blog.save()
   response.json(savedBlog)
 })
 
@@ -59,6 +72,9 @@ blogsRouter.delete('/:id', async (request, response) => {
     if (blog.user.toString() === user.id.toString())
     {
       await Blog.findByIdAndRemove(request.params.id)
+      // delete the blogID associated to the user
+      await user.blogs.pull(blog._id)
+      await user.save()
       response.status(204).end()
     }
     else
@@ -83,7 +99,8 @@ blogsRouter.put('/:id', (request, response, next) => {
     title: body.title,
     author: body.author,
     url: body.url,
-    likes: body.likes
+    likes: body.likes,
+    comments: body.comments
   }
 
   Blog.findByIdAndUpdate(request.params.id, blog, { new: true })
@@ -92,5 +109,6 @@ blogsRouter.put('/:id', (request, response, next) => {
     })
     .catch(error => next(error))
 })
+
 
 module.exports = blogsRouter
